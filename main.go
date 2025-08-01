@@ -1,9 +1,15 @@
 package main
 
 import (
+	"e-com/src/services"
 	"fmt"
 )
 
 func main() {
-	fmt.Println("Hello im basic go")
+	collection := services.DB.Collection("orders")
+	fmt.Println("📦 Collection reference ready:", collection.Name())
+}
+
+func init() {
+	services.InitMongoDB()
 }
