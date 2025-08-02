@@ -25,6 +25,7 @@ func main() {
 	r.HandleFunc("/", HandleRoot)
 
 	r.HandleFunc("/registration", controllers.RegisterUserController)
+	r.HandleFunc("/login", controllers.LoginController)
 
 	fmt.Println("Server is running at http://localhost:5000")
 	log.Fatal(http.ListenAndServe(":5000", r))

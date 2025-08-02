@@ -12,6 +12,11 @@ type UserRegistrationSchema struct {
 	Password string `json:"password" binding:"required,password,min=6"`
 }
 
+type UserLoginSchema struct {
+	Email    string `json:"email" binding:"min=6,email"`
+	Password string `json:"password" binding:"required,password,min=6"`
+}
+
 func UserRegistrationDto(data UserRegistrationSchema) UserRegistration {
 	return UserRegistration(data)
 }
