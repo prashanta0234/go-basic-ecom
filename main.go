@@ -2,6 +2,7 @@ package main
 
 import (
 	"e-com/src/controllers"
+	"e-com/src/middleware"
 	"e-com/src/services"
 	"encoding/json"
 	"fmt"
@@ -18,7 +19,7 @@ func HandleRoot(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	collection := services.DB.Collection("orders")
-	fmt.Println("📦 Collection reference ready:", collection.Name())
+	fmt.Println("Collection reference ready:", collection.Name())
 
 	r := http.NewServeMux()
 
@@ -26,6 +27,8 @@ func main() {
 
 	r.HandleFunc("/registration", controllers.RegisterUserController)
 	r.HandleFunc("/login", controllers.LoginController)
+
+	r.HandleFunc("/product", middleware.AuthMiddleware(controllers.Products))
 
 	fmt.Println("Server is running at http://localhost:5000")
 	log.Fatal(http.ListenAndServe(":5000", r))

@@ -13,4 +13,5 @@ type Products struct {
 	Image       string             `bson:"image" json:"image"`
 	Price       float64            `bson:"price,omitempty" json:"price"`
 	CreatedAt   time.Time          `bson:"createdAt,omitempty" json:"createdAt"`
+	CreatedBy   string             `bson:"createdBy,omitempty" json:"createdBy"`
 }
