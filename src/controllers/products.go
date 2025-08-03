@@ -70,6 +70,30 @@ func Products(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
+	if r.Method == "DELETE" {
+		pathParts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
+		
+		if len(pathParts) < 2 || pathParts[1] == "" {
+			http.Error(w, "Product ID is required", http.StatusBadRequest)
+			return
+		}
+
+		productID := pathParts[1]
+		userID := r.Context().Value("userID").(string)
+
+		err := services.DeleteProduct(productID, userID)
+
+		if err != nil {
+			http.Error(w, "Delete failed: "+err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		w.WriteHeader(200)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"message": "Product deleted successfully!",
+		})
+	}
+
 	if r.Method == "GET" {
 		pathParts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
 		
