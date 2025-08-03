@@ -15,6 +15,11 @@ func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
+		if r.Method == "GET" {
+			next.ServeHTTP(w, r)
+			return
+		}
+
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
 			helper.HandleHeader(w)

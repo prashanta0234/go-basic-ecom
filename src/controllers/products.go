@@ -20,7 +20,6 @@ func Products(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// Get user ID from context (set by AuthMiddleware)
 		userID := r.Context().Value("userID").(string)
 
 		data, err := services.CreateProductsService(input, userID)
@@ -34,6 +33,22 @@ func Products(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(map[string]interface{}{
 			"message": "Product Created successfully!",
 			"data":    data,
+		})
+	}
+
+	if r.Method == "GET" {
+		nameFilter := r.URL.Query().Get("name")
+
+		products, err := services.GetProducts(nameFilter)
+		if err != nil {
+			http.Error(w, "Something went wrong: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(200)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"message": "Products fetched successfully!",
+			"data":    products,
 		})
 	}
 }

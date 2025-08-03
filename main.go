@@ -23,11 +23,12 @@ func main() {
 
 	r := http.NewServeMux()
 
-	r.HandleFunc("/", HandleRoot)
-
+	
+	r.HandleFunc("/health", HandleRoot)
+	
 	r.HandleFunc("/registration", controllers.RegisterUserController)
 	r.HandleFunc("/login", controllers.LoginController)
-
+	
 	r.HandleFunc("/product", middleware.AuthMiddleware(controllers.Products))
 
 	fmt.Println("Server is running at http://localhost:5000")
