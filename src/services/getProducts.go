@@ -6,6 +6,7 @@ import (
 	"errors"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func GetProducts(nameFilter string) ([]*models.Products, error) {
@@ -31,4 +32,21 @@ func GetProducts(nameFilter string) ([]*models.Products, error) {
 	}
 
 	return products, nil
+}
+
+func GetProductByID(productID string) (*models.Products, error) {
+	collection := DB.Collection("products")
+
+	objectID, err := primitive.ObjectIDFromHex(productID)
+	if err != nil {
+		return nil, errors.New("invalid product ID format")
+	}
+
+	var product models.Products
+	err = collection.FindOne(context.TODO(), bson.M{"_id": objectID}).Decode(&product)
+	if err != nil {
+		return nil, errors.New("product not found")
+	}
+
+	return &product, nil
 }

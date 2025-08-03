@@ -6,6 +6,7 @@ import (
 	"e-com/src/services"
 	"encoding/json"
 	"net/http"
+	"strings"
 )
 
 func Products(w http.ResponseWriter, r *http.Request) {
@@ -37,6 +38,25 @@ func Products(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.Method == "GET" {
+		pathParts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
+		
+		if len(pathParts) > 1 && pathParts[1] != "" {
+			productID := pathParts[1]
+			product, err := services.GetProductByID(productID)
+			
+			if err != nil {
+				http.Error(w, "Product not found: "+err.Error(), http.StatusNotFound)
+				return
+			}
+
+			w.WriteHeader(200)
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"message": "Product fetched successfully!",
+				"data":    product,
+			})
+			return
+		}
+
 		nameFilter := r.URL.Query().Get("name")
 
 		products, err := services.GetProducts(nameFilter)
