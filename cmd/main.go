@@ -6,15 +6,22 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
-	// Initialize database
 	bootstrap.InitMongoDB()
 
-	// Setup routes
 	r := route.SetupRoutes()
 
 	fmt.Println("Server is running at http://localhost:5000")
 	log.Fatal(http.ListenAndServe(":5000", r))
+}
+
+func init() {
+	err := godotenv.Load("../.env")
+	if err != nil {
+		log.Fatal("Error loading .env file", err)
+	}
 }

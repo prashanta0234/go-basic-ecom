@@ -99,12 +99,26 @@ go-basic-ecom/
    ```
 
 2. **Environment Setup**
+
+   **Option 1: Use the setup script**
+
+   ```bash
+   # Windows
+   setup_env.bat
+
+   # Unix/Linux/Mac
+   chmod +x setup_env.sh
+   ./setup_env.sh
+   ```
+
+   **Option 2: Create manually**
    Create a `.env` file with:
 
    ```
-   MONGODB_URI=your_mongodb_connection_string
-   MONGODB_NAME=your_database_name
-   JWT_SECRET=your_jwt_secret
+   MONGODB_URI=mongodb://localhost:27017
+   MONGODB_NAME=ecommerce_db
+   JWT_SECRET=your_super_secret_jwt_key_here_change_this_in_production
+   PORT=5000
    ```
 
 3. **Run the Application**
