@@ -159,3 +159,23 @@ go-basic-ecom/
 - **bcrypt**: For password hashing
 - **godotenv**: For environment variable management
 - **Stripe Go**: For payment processing
+
+## API Documentation
+
+Interactive API documentation is available using Swagger/OpenAPI:
+
+### View Documentation
+
+1. **Local HTML**: Open `docs/index.html` in your browser
+2. **Online Editor**: Copy `swagger.yaml` to [Swagger Editor](https://editor.swagger.io/)
+3. **Serve Locally**: Run a simple HTTP server and visit `http://localhost:8080/docs/`
+
+### Documentation Features
+
+- **Interactive Testing**: Try API endpoints directly from the browser
+- **Authentication**: JWT Bearer token support
+- **Request/Response Examples**: Complete examples for all endpoints
+- **Schema Definitions**: User and Product data models
+- **Error Handling**: Comprehensive error response documentation
+
+For detailed documentation instructions, see [docs/README.md](docs/README.md).

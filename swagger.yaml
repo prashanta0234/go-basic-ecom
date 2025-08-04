@@ -1,0 +1,702 @@
+openapi: 3.0.3
+info:
+  title: Go Basic E-commerce API
+  description: |
+    A clean architecture implementation of a basic e-commerce API built with Go.
+
+    ## Features
+    - User Management with JWT authentication
+    - Product Management with CRUD operations
+    - Payment Processing with Stripe integration
+    - Clean Architecture with separation of concerns
+
+    ## Authentication
+    Most endpoints require JWT authentication. Include the token in the Authorization header:
+    ```
+    Authorization: Bearer <your_jwt_token>
+    ```
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@example.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:5000
+    description: Development server
+  - url: https://api.example.com
+    description: Production server
+
+tags:
+  - name: Authentication
+    description: User registration and login operations
+  - name: Products
+    description: Product management operations
+  - name: Payments
+    description: Stripe payment processing
+  - name: Health
+    description: Health check endpoints
+
+paths:
+  /health:
+    get:
+      tags:
+        - Health
+      summary: Health Check
+      description: Check if the API is running properly
+      responses:
+        "200":
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Health is good bro"
+              example:
+                message: "Health is good bro"
+
+  /registration:
+    post:
+      tags:
+        - Authentication
+      summary: Register User
+      description: Create a new user account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - email
+                - password
+              properties:
+                name:
+                  type: string
+                  minLength: 3
+                  description: User's full name
+                  example: "John Doe"
+                email:
+                  type: string
+                  format: email
+                  description: User's email address
+                  example: "john@example.com"
+                password:
+                  type: string
+                  minLength: 6
+                  description: User's password (minimum 6 characters)
+                  example: "password123"
+      responses:
+        "201":
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Registration successful!"
+                  token:
+                    type: string
+                    description: JWT token for authentication
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+              example:
+                message: "Registration successful!"
+                token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        "400":
+          description: Bad request - validation error
+          content:
+            application/json:
+              schema:
+                type: string
+              example: "Invalid input: email already exists"
+
+  /login:
+    post:
+      tags:
+        - Authentication
+      summary: Login User
+      description: Authenticate user and get JWT token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: User's email address
+                  example: "john@example.com"
+                password:
+                  type: string
+                  description: User's password
+                  example: "password123"
+      responses:
+        "201":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Login successful!"
+                  token:
+                    type: string
+                    description: JWT token for authentication
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+              example:
+                message: "Login successful!"
+                token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        "400":
+          description: Bad request - invalid credentials
+          content:
+            application/json:
+              schema:
+                type: string
+              example: "sorry wrong password"
+
+  /product:
+    get:
+      tags:
+        - Products
+      summary: Get All Products
+      description: Retrieve all products with optional name filtering
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: name
+          in: query
+          description: Filter products by name (case-insensitive)
+          required: false
+          schema:
+            type: string
+          example: "laptop"
+      responses:
+        "200":
+          description: Products retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Products fetched successfully!"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Product"
+              example:
+                message: "Products fetched successfully!"
+                data:
+                  - _id: "507f1f77bcf86cd799439011"
+                    name: "MacBook Pro"
+                    description: "High-performance laptop for professionals"
+                    image: "https://example.com/macbook.jpg"
+                    price: 1299.99
+                    createdAt: "2024-01-15T10:30:00Z"
+                    updatedAt: "2024-01-15T10:30:00Z"
+                    createdBy: "507f1f77bcf86cd799439012"
+        "401":
+          description: Unauthorized - invalid or missing token
+        "500":
+          description: Internal server error
+
+    post:
+      tags:
+        - Products
+      summary: Create Product
+      description: Create a new product (requires authentication)
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - description
+                - price
+              properties:
+                name:
+                  type: string
+                  minLength: 3
+                  description: Product name
+                  example: "MacBook Pro"
+                description:
+                  type: string
+                  minLength: 20
+                  description: Product description
+                  example: "High-performance laptop for professionals"
+                image:
+                  type: string
+                  format: uri
+                  description: Product image URL
+                  example: "https://example.com/macbook.jpg"
+                price:
+                  type: number
+                  minimum: 0
+                  description: Product price in USD
+                  example: 1299.99
+      responses:
+        "201":
+          description: Product created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Product Created successfully!"
+                  data:
+                    $ref: "#/components/schemas/Product"
+              example:
+                message: "Product Created successfully!"
+                data:
+                  _id: "507f1f77bcf86cd799439011"
+                  name: "MacBook Pro"
+                  description: "High-performance laptop for professionals"
+                  image: "https://example.com/macbook.jpg"
+                  price: 1299.99
+                  createdAt: "2024-01-15T10:30:00Z"
+                  updatedAt: "2024-01-15T10:30:00Z"
+                  createdBy: "507f1f77bcf86cd799439012"
+        "400":
+          description: Bad request - validation error
+        "401":
+          description: Unauthorized - invalid or missing token
+        "500":
+          description: Internal server error
+
+  /product/{id}:
+    get:
+      tags:
+        - Products
+      summary: Get Product by ID
+      description: Retrieve a specific product by its ID
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Product ID
+          schema:
+            type: string
+          example: "507f1f77bcf86cd799439011"
+      responses:
+        "200":
+          description: Product retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Product fetched successfully!"
+                  data:
+                    $ref: "#/components/schemas/Product"
+              example:
+                message: "Product fetched successfully!"
+                data:
+                  _id: "507f1f77bcf86cd799439011"
+                  name: "MacBook Pro"
+                  description: "High-performance laptop for professionals"
+                  image: "https://example.com/macbook.jpg"
+                  price: 1299.99
+                  createdAt: "2024-01-15T10:30:00Z"
+                  updatedAt: "2024-01-15T10:30:00Z"
+                  createdBy: "507f1f77bcf86cd799439012"
+        "401":
+          description: Unauthorized - invalid or missing token
+        "404":
+          description: Product not found
+        "500":
+          description: Internal server error
+
+    put:
+      tags:
+        - Products
+      summary: Update Product
+      description: Update an existing product (only by the creator)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Product ID
+          schema:
+            type: string
+          example: "507f1f77bcf86cd799439011"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - description
+                - price
+              properties:
+                name:
+                  type: string
+                  minLength: 3
+                  description: Product name
+                  example: "MacBook Pro Updated"
+                description:
+                  type: string
+                  minLength: 20
+                  description: Product description
+                  example: "Updated high-performance laptop for professionals"
+                image:
+                  type: string
+                  format: uri
+                  description: Product image URL
+                  example: "https://example.com/macbook-updated.jpg"
+                price:
+                  type: number
+                  minimum: 0
+                  description: Product price in USD
+                  example: 1399.99
+      responses:
+        "200":
+          description: Product updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Product updated successfully!"
+                  data:
+                    $ref: "#/components/schemas/Product"
+        "400":
+          description: Bad request - validation error or unauthorized
+        "401":
+          description: Unauthorized - invalid or missing token
+        "404":
+          description: Product not found
+        "500":
+          description: Internal server error
+
+    delete:
+      tags:
+        - Products
+      summary: Delete Product
+      description: Delete a product (only by the creator)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Product ID
+          schema:
+            type: string
+          example: "507f1f77bcf86cd799439011"
+      responses:
+        "200":
+          description: Product deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Product deleted successfully!"
+              example:
+                message: "Product deleted successfully!"
+        "400":
+          description: Bad request - unauthorized or product not found
+        "401":
+          description: Unauthorized - invalid or missing token
+        "500":
+          description: Internal server error
+
+  /payment/checkout:
+    post:
+      tags:
+        - Payments
+      summary: Create Checkout Session
+      description: Create a Stripe checkout session for a product (returns checkout URL)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - product_id
+              properties:
+                product_id:
+                  type: string
+                  description: Product ID to purchase
+                  example: "507f1f77bcf86cd799439011"
+                currency:
+                  type: string
+                  description: Currency for payment (defaults to USD)
+                  default: "usd"
+                  example: "usd"
+      responses:
+        "200":
+          description: Checkout session created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  checkout_url:
+                    type: string
+                    format: uri
+                    description: Stripe checkout URL
+                    example: "https://checkout.stripe.com/pay/cs_test_..."
+                  message:
+                    type: string
+                    example: "Checkout session created successfully"
+              example:
+                checkout_url: "https://checkout.stripe.com/pay/cs_test_..."
+                message: "Checkout session created successfully"
+        "400":
+          description: Bad request - invalid product ID or validation error
+        "404":
+          description: Product not found
+        "500":
+          description: Internal server error
+
+  /payment/checkout/redirect:
+    post:
+      tags:
+        - Payments
+      summary: Create Checkout Session (Redirect)
+      description: Create a Stripe checkout session and redirect directly to Stripe
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - product_id
+              properties:
+                product_id:
+                  type: string
+                  description: Product ID to purchase
+                  example: "507f1f77bcf86cd799439011"
+                currency:
+                  type: string
+                  description: Currency for payment (defaults to USD)
+                  default: "usd"
+                  example: "usd"
+      responses:
+        "303":
+          description: Redirect to Stripe checkout page
+          headers:
+            Location:
+              description: Stripe checkout URL
+              schema:
+                type: string
+                example: "https://checkout.stripe.com/pay/cs_test_..."
+        "400":
+          description: Bad request - invalid product ID or validation error
+        "404":
+          description: Product not found
+        "500":
+          description: Internal server error
+
+  /payment/success:
+    get:
+      tags:
+        - Payments
+      summary: Payment Success Callback
+      description: Callback endpoint for successful payments
+      responses:
+        "200":
+          description: Payment success acknowledged
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Payment successful!"
+                  status:
+                    type: string
+                    example: "success"
+              example:
+                message: "Payment successful!"
+                status: "success"
+
+  /payment/cancel:
+    get:
+      tags:
+        - Payments
+      summary: Payment Cancel Callback
+      description: Callback endpoint for cancelled payments
+      responses:
+        "200":
+          description: Payment cancellation acknowledged
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Payment cancelled"
+                  status:
+                    type: string
+                    example: "cancelled"
+              example:
+                message: "Payment cancelled"
+                status: "cancelled"
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        JWT token obtained from login or registration.
+        Include the token in the Authorization header:
+        ```
+        Authorization: Bearer <your_jwt_token>
+        ```
+
+  schemas:
+    User:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: User ID
+          example: "507f1f77bcf86cd799439012"
+        name:
+          type: string
+          description: User's full name
+          example: "John Doe"
+        email:
+          type: string
+          format: email
+          description: User's email address
+          example: "john@example.com"
+        createdAt:
+          type: string
+          format: date-time
+          description: User creation timestamp
+          example: "2024-01-15T10:30:00Z"
+      required:
+        - _id
+        - name
+        - email
+        - createdAt
+
+    Product:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Product ID
+          example: "507f1f77bcf86cd799439011"
+        name:
+          type: string
+          description: Product name
+          example: "MacBook Pro"
+        description:
+          type: string
+          description: Product description
+          example: "High-performance laptop for professionals"
+        image:
+          type: string
+          format: uri
+          description: Product image URL
+          example: "https://example.com/macbook.jpg"
+        price:
+          type: number
+          minimum: 0
+          description: Product price in USD
+          example: 1299.99
+        createdAt:
+          type: string
+          format: date-time
+          description: Product creation timestamp
+          example: "2024-01-15T10:30:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: Product last update timestamp
+          example: "2024-01-15T10:30:00Z"
+        createdBy:
+          type: string
+          description: ID of the user who created the product
+          example: "507f1f77bcf86cd799439012"
+      required:
+        - _id
+        - name
+        - description
+        - price
+        - createdAt
+        - createdBy
+
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Error message
+          example: "Invalid input: email already exists"
+        status:
+          type: string
+          description: Error status
+          example: "error"
+
+  examples:
+    RegistrationRequest:
+      summary: User Registration
+      value:
+        name: "John Doe"
+        email: "john@example.com"
+        password: "password123"
+
+    LoginRequest:
+      summary: User Login
+      value:
+        email: "john@example.com"
+        password: "password123"
+
+    ProductRequest:
+      summary: Create Product
+      value:
+        name: "MacBook Pro"
+        description: "High-performance laptop for professionals"
+        image: "https://example.com/macbook.jpg"
+        price: 1299.99
+
+    PaymentRequest:
+      summary: Create Payment
+      value:
+        product_id: "507f1f77bcf86cd799439011"
+        currency: "usd"
