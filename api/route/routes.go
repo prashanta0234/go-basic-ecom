@@ -20,6 +20,11 @@ func SetupRoutes() *http.ServeMux {
 	r.HandleFunc("/product", middleware.AuthMiddleware(controllers.Products))
 	r.HandleFunc("/product/", middleware.AuthMiddleware(controllers.Products))
 
+	// Payment routes
+	r.HandleFunc("/payment/checkout", controllers.CreateCheckoutSessionController)
+	r.HandleFunc("/payment/success", controllers.PaymentSuccessController)
+	r.HandleFunc("/payment/cancel", controllers.PaymentCancelController)
+
 	return r
 }
 

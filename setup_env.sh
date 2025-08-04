@@ -12,6 +12,10 @@ JWT_SECRET=your_super_secret_jwt_key_here_change_this_in_production
 
 # Server Configuration
 PORT=5000
+
+# Stripe Configuration
+STRIPE_SECRET_KEY=your_stripe_secret_key_here
+STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key_here
 EOF
 
 echo ".env file created successfully!"

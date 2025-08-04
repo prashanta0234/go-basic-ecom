@@ -69,6 +69,7 @@ go-basic-ecom/
 - **Product Management**: CRUD operations for products
 - **Authentication**: JWT-based authentication middleware
 - **Database**: MongoDB integration
+- **Payment Processing**: Stripe integration for checkout sessions
 - **Clean Architecture**: Separation of concerns with clear layer boundaries
 
 ## API Endpoints
@@ -90,45 +91,58 @@ go-basic-ecom/
 
 - `GET /health` - Health check endpoint
 
+### Payment (Stripe Integration)
+
+- `POST /payment/checkout` - Create Stripe checkout session by product ID (returns checkout URL)
+- `POST /payment/checkout/redirect` - Create Stripe checkout session by product ID (redirects directly)
+- `GET /payment/success` - Payment success callback
+- `GET /payment/cancel` - Payment cancel callback
+
 ## Getting Started
 
-1. **Install Dependencies**
+1.  **Install Dependencies**
 
-   ```bash
-   go mod tidy
-   ```
+    ```bash
+    go mod tidy
+    ```
 
-2. **Environment Setup**
+2.  **Environment Setup**
 
-   **Option 1: Use the setup script**
+    **Option 1: Use the setup script**
 
-   ```bash
-   # Windows
-   setup_env.bat
+    ```bash
+    # Windows
+    setup_env.bat
 
-   # Unix/Linux/Mac
-   chmod +x setup_env.sh
-   ./setup_env.sh
-   ```
+    # Unix/Linux/Mac
+    chmod +x setup_env.sh
+    ./setup_env.sh
+    ```
 
-   **Option 2: Create manually**
-   Create a `.env` file with:
+    **Option 2: Create manually**
+    Create a `.env` file with:
 
-   ```
-   MONGODB_URI=mongodb://localhost:27017
-   MONGODB_NAME=ecommerce_db
-   JWT_SECRET=your_super_secret_jwt_key_here_change_this_in_production
-   PORT=5000
-   ```
+        ```
 
-3. **Run the Application**
+    MONGODB_URI=mongodb://localhost:27017
+    MONGODB_NAME=ecommerce_db
+    JWT_SECRET=your_super_secret_jwt_key_here_change_this_in_production
+    PORT=5000
+    STRIPE_SECRET_KEY=your_stripe_secret_key_here
+    STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key_here
 
-   ```bash
-   go run cmd/main.go
-   ```
+    ```
 
-4. **Access the API**
-   The server will run on `http://localhost:5000`
+    ```
+
+3.  **Run the Application**
+
+    ```bash
+    go run cmd/main.go
+    ```
+
+4.  **Access the API**
+    The server will run on `http://localhost:5000`
 
 ## Clean Architecture Benefits
 
@@ -144,3 +158,4 @@ go-basic-ecom/
 - **JWT**: For authentication
 - **bcrypt**: For password hashing
 - **godotenv**: For environment variable management
+- **Stripe Go**: For payment processing

@@ -8,6 +8,11 @@ require (
 )
 
 require (
+	github.com/stripe/stripe-go/v74 v74.30.0 // indirect
+	github.com/stripe/stripe-go/v82 v82.4.0 // indirect
+)
+
+require (
 	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/golang/snappy v1.0.0 // indirect
 	github.com/klauspost/compress v1.16.7 // indirect
