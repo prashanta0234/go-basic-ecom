@@ -2,8 +2,10 @@ package controllers
 
 import (
 	"e-com/internal"
+	"e-com/internal/reponse"
 	usecase "e-com/usecase"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strings"
 )
@@ -16,7 +18,7 @@ func Products(w http.ResponseWriter, r *http.Request) {
 		err := json.NewDecoder(r.Body).Decode(&input)
 
 		if err != nil {
-			http.Error(w, "Invalid input: "+err.Error(), http.StatusBadRequest)
+			reponse.Error(w, 400, "Invalid input: "+err.Error(), err)
 			return
 		}
 
@@ -25,22 +27,18 @@ func Products(w http.ResponseWriter, r *http.Request) {
 		data, err := usecase.CreateProductsService(input, userID)
 
 		if err != nil {
-			http.Error(w, "Something went wrong: "+err.Error(), http.StatusInternalServerError)
+			reponse.Error(w, 500, "Something went wrong: "+err.Error(), err)
 			return
 		}
 
-		w.WriteHeader(201)
-		json.NewEncoder(w).Encode(map[string]interface{}{
-			"message": "Product Created successfully!",
-			"data":    data,
-		})
+		reponse.Success(w, 201, "Product Created successfully!", data)
 	}
 
 	if r.Method == "PUT" {
 		pathParts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
 
 		if len(pathParts) < 2 || pathParts[1] == "" {
-			http.Error(w, "Product ID is required", http.StatusBadRequest)
+			reponse.Error(w, 400, "Product ID is required", errors.New("product ID is required"))
 			return
 		}
 
@@ -51,29 +49,25 @@ func Products(w http.ResponseWriter, r *http.Request) {
 		err := json.NewDecoder(r.Body).Decode(&input)
 
 		if err != nil {
-			http.Error(w, "Invalid input: "+err.Error(), http.StatusBadRequest)
+			reponse.Error(w, 400, "Invalid input: "+err.Error(), err)
 			return
 		}
 
 		updatedProduct, err := usecase.UpdateProduct(productID, input, userID)
 
 		if err != nil {
-			http.Error(w, "Update failed: "+err.Error(), http.StatusBadRequest)
+			reponse.Error(w, 400, "Update failed: "+err.Error(), err)
 			return
 		}
 
-		w.WriteHeader(200)
-		json.NewEncoder(w).Encode(map[string]interface{}{
-			"message": "Product updated successfully!",
-			"data":    updatedProduct,
-		})
+		reponse.Success(w, 200, "Product updated successfully!", updatedProduct)
 	}
 
 	if r.Method == "DELETE" {
 		pathParts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
 
 		if len(pathParts) < 2 || pathParts[1] == "" {
-			http.Error(w, "Product ID is required", http.StatusBadRequest)
+			reponse.Error(w, 400, "Product ID is required", errors.New("product ID is required"))
 			return
 		}
 
@@ -83,14 +77,11 @@ func Products(w http.ResponseWriter, r *http.Request) {
 		err := usecase.DeleteProduct(productID, userID)
 
 		if err != nil {
-			http.Error(w, "Delete failed: "+err.Error(), http.StatusBadRequest)
+			reponse.Error(w, 400, "Delete failed: "+err.Error(), err)
 			return
 		}
 
-		w.WriteHeader(200)
-		json.NewEncoder(w).Encode(map[string]interface{}{
-			"message": "Product deleted successfully!",
-		})
+		reponse.Success(w, 200, "Product deleted successfully!", nil)
 	}
 
 	if r.Method == "GET" {
@@ -101,15 +92,11 @@ func Products(w http.ResponseWriter, r *http.Request) {
 			product, err := usecase.GetProductByID(productID)
 
 			if err != nil {
-				http.Error(w, "Product not found: "+err.Error(), http.StatusNotFound)
+				reponse.Error(w, 404, "Product not found: "+err.Error(), err)
 				return
 			}
 
-			w.WriteHeader(200)
-			json.NewEncoder(w).Encode(map[string]interface{}{
-				"message": "Product fetched successfully!",
-				"data":    product,
-			})
+			reponse.Success(w, 200, "Product fetched successfully!", product)
 			return
 		}
 
@@ -117,14 +104,10 @@ func Products(w http.ResponseWriter, r *http.Request) {
 
 		products, err := usecase.GetProducts(nameFilter)
 		if err != nil {
-			http.Error(w, "Something went wrong: "+err.Error(), http.StatusInternalServerError)
+			reponse.Error(w, 500, "Something went wrong: "+err.Error(), err)
 			return
 		}
 
-		w.WriteHeader(200)
-		json.NewEncoder(w).Encode(map[string]interface{}{
-			"message": "Products fetched successfully!",
-			"data":    products,
-		})
+		reponse.Success(w, 200, "Products fetched successfully!", products)
 	}
 }

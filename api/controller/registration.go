@@ -2,8 +2,10 @@ package controllers
 
 import (
 	"e-com/internal"
+	"e-com/internal/reponse"
 	usecase "e-com/usecase"
 	"encoding/json"
+	"errors"
 	"net/http"
 )
 
@@ -11,8 +13,7 @@ func RegisterUserController(w http.ResponseWriter, r *http.Request) {
 
 	internal.HandleHeader(w)
 	if r.Method != "POST" {
-		w.WriteHeader(404)
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		reponse.Error(w, 404, "Method not allowed", errors.New("method not allowed"))
 		return
 	}
 
@@ -20,19 +21,18 @@ func RegisterUserController(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&input)
 
 	if err != nil {
-		http.Error(w, "Invalid input: "+err.Error(), http.StatusBadRequest)
+		reponse.Error(w, 400, "Invalid input: "+err.Error(), err)
 		return
 	}
 
 	token, err := usecase.RegisterUserService(input)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		reponse.Error(w, 400, "Registration failed!", err)
 		return
 	}
 
-	w.WriteHeader(201)
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	reponse.Success(w, 201, "Registration successful!", map[string]interface{}{
 		"message": "Registration successful!",
 		"token":   token,
 	})

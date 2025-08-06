@@ -2,8 +2,9 @@ package controllers
 
 import (
 	"e-com/internal"
+	"e-com/internal/reponse"
 	"e-com/usecase"
-	"encoding/json"
+	"errors"
 	"net/http"
 )
 
@@ -11,75 +12,67 @@ func GetUserOrdersController(w http.ResponseWriter, r *http.Request) {
 	internal.HandleHeader(w)
 
 	if r.Method != "GET" {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		reponse.Error(w, 404, "Method not allowed", errors.New("method not allowed"))
 		return
 	}
 
 	userID := r.Context().Value("userID")
 	if userID == nil {
-		http.Error(w, "User not authenticated", http.StatusUnauthorized)
+		reponse.Error(w, 401, "User not authenticated", errors.New("user not authenticated"))
 		return
 	}
 
 	userIDStr, ok := userID.(string)
 	if !ok {
-		http.Error(w, "Invalid user ID", http.StatusInternalServerError)
+		reponse.Error(w, 500, "Invalid user ID", errors.New("invalid user ID"))
 		return
 	}
 
 	orders, err := usecase.GetOrdersByUserID(userIDStr)
 	if err != nil {
-		http.Error(w, "Failed to get orders: "+err.Error(), http.StatusInternalServerError)
+		reponse.Error(w, 500, "Failed to get orders: "+err.Error(), err)
 		return
 	}
 
-	w.WriteHeader(200)
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"message": "Orders retrieved successfully",
-		"orders":  orders,
-	})
+	reponse.Success(w, 200, "Orders retrieved successfully", orders)
 }
 
 func GetOrderByIDController(w http.ResponseWriter, r *http.Request) {
 	internal.HandleHeader(w)
 
 	if r.Method != "GET" {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		reponse.Error(w, 404, "Method not allowed", errors.New("method not allowed"))
 		return
 	}
 
 	orderID := r.URL.Path[len("/order/"):]
 	if orderID == "" {
-		http.Error(w, "Order ID is required", http.StatusBadRequest)
+		reponse.Error(w, 400, "Order ID is required", errors.New("order ID is required"))
 		return
 	}
 
 	userID := r.Context().Value("userID")
 	if userID == nil {
-		http.Error(w, "User not authenticated", http.StatusUnauthorized)
+		reponse.Error(w, 401, "User not authenticated", errors.New("user not authenticated"))
 		return
 	}
 
 	order, err := usecase.GetOrderByID(orderID)
 	if err != nil {
-		http.Error(w, "Failed to get order: "+err.Error(), http.StatusNotFound)
+		reponse.Error(w, 404, "Failed to get order: "+err.Error(), err)
 		return
 	}
 
 	userIDStr, ok := userID.(string)
 	if !ok {
-		http.Error(w, "Invalid user ID", http.StatusInternalServerError)
+		reponse.Error(w, 500, "Invalid user ID", errors.New("invalid user ID"))
 		return
 	}
 
 	if order.UserID.Hex() != userIDStr {
-		http.Error(w, "Access denied", http.StatusForbidden)
+		reponse.Error(w, 403, "Access denied", errors.New("access denied"))
 		return
 	}
 
-	w.WriteHeader(200)
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"message": "Order retrieved successfully",
-		"order":   order,
-	})
+	reponse.Success(w, 200, "Order retrieved successfully", order)
 }
