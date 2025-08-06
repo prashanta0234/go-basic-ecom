@@ -12,6 +12,7 @@ import (
 
 func main() {
 	bootstrap.InitMongoDB()
+	bootstrap.InitRedis()
 
 	r := route.SetupRoutes()
 

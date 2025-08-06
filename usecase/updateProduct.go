@@ -5,7 +5,9 @@ import (
 	"e-com/bootstrap"
 	domain "e-com/domain"
 	"e-com/internal"
+	"e-com/internal/cache"
 	"errors"
+	"log"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -58,6 +60,11 @@ func UpdateProduct(productID string, data internal.ProductsSchema, userID string
 	err = collection.FindOne(context.TODO(), bson.M{"_id": objectID}).Decode(&updatedProduct)
 	if err != nil {
 		return nil, errors.New("failed to fetch updated product")
+	}
+
+	cacheService := cache.NewCacheService()
+	if err := cacheService.InvalidateSpecificProductCache(productID); err != nil {
+		log.Printf("Failed to invalidate product cache: %v", err)
 	}
 
 	return &updatedProduct, nil

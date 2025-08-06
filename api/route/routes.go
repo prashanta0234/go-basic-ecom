@@ -3,6 +3,7 @@ package route
 import (
 	controllers "e-com/api/controller"
 	"e-com/api/middleware"
+	"e-com/internal/cache"
 	"net/http"
 )
 
@@ -28,6 +29,8 @@ func SetupRoutes() *http.ServeMux {
 	// Order routes (protected)
 	r.HandleFunc("/orders", middleware.AuthMiddleware(controllers.GetUserOrdersController))
 	r.HandleFunc("/order/", middleware.AuthMiddleware(controllers.GetOrderByIDController))
+
+	r.HandleFunc("/cache/invalidate", cache.CacheInvalidationEndpoint)
 
 	return r
 }

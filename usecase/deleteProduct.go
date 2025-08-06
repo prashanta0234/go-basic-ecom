@@ -4,7 +4,9 @@ import (
 	"context"
 	"e-com/bootstrap"
 	domain "e-com/domain"
+	"e-com/internal/cache"
 	"errors"
+	"log"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -35,6 +37,11 @@ func DeleteProduct(productID string, userID string) error {
 
 	if result.DeletedCount == 0 {
 		return errors.New("product not found")
+	}
+
+	cacheService := cache.NewCacheService()
+	if err := cacheService.InvalidateSpecificProductCache(productID); err != nil {
+		log.Printf("Failed to invalidate product cache: %v", err)
 	}
 
 	return nil

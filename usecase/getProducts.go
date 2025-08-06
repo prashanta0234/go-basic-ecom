@@ -4,7 +4,9 @@ import (
 	"context"
 	"e-com/bootstrap"
 	domain "e-com/domain"
+	"e-com/internal/cache"
 	"errors"
+	"log"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -33,6 +35,17 @@ type PaginationMeta struct {
 }
 
 func GetProducts(fil Filter) (*ProductsResponse, error) {
+	cacheService := cache.NewCacheService()
+
+	cacheKey := cacheService.GenerateProductsListKey(fil.Name, fil.Page, fil.Limit)
+
+	var cachedResponse ProductsResponse
+	if err := cacheService.Get(cacheKey, &cachedResponse); err == nil {
+		log.Printf("Cache HIT for products list: %s", cacheKey)
+		return &cachedResponse, nil
+	}
+
+	log.Printf("Cache MISS for products list: %s", cacheKey)
 
 	collection := bootstrap.DB.Collection("products")
 
@@ -81,10 +94,26 @@ func GetProducts(fil Filter) (*ProductsResponse, error) {
 		},
 	}
 
+	if err := cacheService.Set(cacheKey, response, cache.ProductTTL); err != nil {
+		log.Printf("Failed to cache products list: %v", err)
+	}
+
 	return response, nil
 }
 
 func GetProductByID(productID string) (*domain.Products, error) {
+	cacheService := cache.NewCacheService()
+
+	cacheKey := cacheService.GenerateProductDetailKey(productID)
+
+	var cachedProduct domain.Products
+	if err := cacheService.Get(cacheKey, &cachedProduct); err == nil {
+		log.Printf("Cache HIT for product detail: %s", productID)
+		return &cachedProduct, nil
+	}
+
+	log.Printf("Cache MISS for product detail: %s", productID)
+
 	collection := bootstrap.DB.Collection("products")
 
 	objectID, err := primitive.ObjectIDFromHex(productID)
@@ -96,6 +125,10 @@ func GetProductByID(productID string) (*domain.Products, error) {
 	err = collection.FindOne(context.TODO(), bson.M{"_id": objectID}).Decode(&product)
 	if err != nil {
 		return nil, errors.New("product not found")
+	}
+
+	if err := cacheService.Set(cacheKey, product, cache.ProductTTL); err != nil {
+		log.Printf("Failed to cache product detail: %v", err)
 	}
 
 	return &product, nil
