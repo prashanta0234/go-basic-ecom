@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -101,13 +102,48 @@ func Products(w http.ResponseWriter, r *http.Request) {
 		}
 
 		nameFilter := r.URL.Query().Get("name")
+		page := r.URL.Query().Get("page")
+		skip := r.URL.Query().Get("skip")
+		limit := r.URL.Query().Get("limit")
 
-		products, err := usecase.GetProducts(nameFilter)
+		if page == "" {
+			page = "1"
+		}
+		if skip == "" {
+			skip = "0"
+		}
+		if limit == "" {
+			limit = "10"
+		}
+
+		pageInt, err := strconv.Atoi(page)
+		if err != nil {
+			reponse.Error(w, 400, "Invalid page: "+err.Error(), err)
+			return
+		}
+		skipInt, err := strconv.Atoi(skip)
+		if err != nil {
+			reponse.Error(w, 400, "Invalid skip: "+err.Error(), err)
+			return
+		}
+
+		limitInt, err := strconv.Atoi(limit)
+		if err != nil {
+			reponse.Error(w, 400, "Invalid limit: "+err.Error(), err)
+			return
+		}
+
+		productsResponse, err := usecase.GetProducts(usecase.Filter{
+			Name:  nameFilter,
+			Page:  pageInt,
+			Skip:  skipInt,
+			Limit: limitInt,
+		})
 		if err != nil {
 			reponse.Error(w, 500, "Something went wrong: "+err.Error(), err)
 			return
 		}
 
-		reponse.Success(w, 200, "Products fetched successfully!", products)
+		reponse.Success(w, 200, "Products fetched successfully!", productsResponse)
 	}
 }

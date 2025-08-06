@@ -12,7 +12,7 @@ func GetUserOrdersController(w http.ResponseWriter, r *http.Request) {
 	internal.HandleHeader(w)
 
 	if r.Method != "GET" {
-		reponse.Error(w, 404, "Method not allowed", errors.New("method not allowed"))
+		reponse.Error(w, 405, "Method not allowed", errors.New("method not allowed"))
 		return
 	}
 
@@ -41,7 +41,7 @@ func GetOrderByIDController(w http.ResponseWriter, r *http.Request) {
 	internal.HandleHeader(w)
 
 	if r.Method != "GET" {
-		reponse.Error(w, 404, "Method not allowed", errors.New("method not allowed"))
+		reponse.Error(w, 405, "Method not allowed", errors.New("method not allowed"))
 		return
 	}
 
