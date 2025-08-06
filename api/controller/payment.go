@@ -16,6 +16,18 @@ func CreateCheckoutSessionController(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	userID := r.Context().Value("userID")
+	if userID == nil {
+		http.Error(w, "User not authenticated", http.StatusUnauthorized)
+		return
+	}
+
+	userIDStr, ok := userID.(string)
+	if !ok {
+		http.Error(w, "Invalid user ID", http.StatusInternalServerError)
+		return
+	}
+
 	var request struct {
 		ProductID string `json:"product_id"`
 		Currency  string `json:"currency"`
@@ -36,7 +48,7 @@ func CreateCheckoutSessionController(w http.ResponseWriter, r *http.Request) {
 		request.Currency = "usd"
 	}
 
-	checkoutURL, err := usecase.PaymentServiceByProductID(request.ProductID, request.Currency)
+	checkoutURL, err := usecase.PaymentServiceByProductID(request.ProductID, request.Currency, userIDStr)
 	if err != nil {
 		http.Error(w, "Failed to create checkout session", http.StatusInternalServerError)
 		return
@@ -52,10 +64,30 @@ func CreateCheckoutSessionController(w http.ResponseWriter, r *http.Request) {
 func PaymentSuccessController(w http.ResponseWriter, r *http.Request) {
 	internal.HandleHeader(w)
 
+	sessionID := r.URL.Query().Get("session_id")
+	if sessionID == "" {
+		http.Error(w, "Missing session ID", http.StatusBadRequest)
+		return
+	}
+
+	userID, productID, err := usecase.GetStripeSessionDetails(sessionID)
+	if err != nil {
+		http.Error(w, "Failed to verify payment: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	order, err := usecase.CreateOrder(userID, productID, sessionID)
+	if err != nil {
+		http.Error(w, "Failed to create order: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	w.WriteHeader(200)
 	json.NewEncoder(w).Encode(map[string]interface{}{
-		"message": "Payment successful!",
-		"status":  "success",
+		"message":  "Payment successful! Order created.",
+		"status":   "success",
+		"order_id": order.OrderID,
+		"order":    order,
 	})
 }
 
