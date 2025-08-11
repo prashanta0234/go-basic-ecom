@@ -17,9 +17,11 @@ func SetupRoutes() *http.ServeMux {
 	r.HandleFunc("/registration", controllers.RegisterUserController)
 	r.HandleFunc("/login", controllers.LoginController)
 
-	// Product routes (protected)
-	r.HandleFunc("/product", middleware.AuthMiddleware(controllers.Products))
-	r.HandleFunc("/product/", middleware.AuthMiddleware(controllers.Products))
+	r.Handle("GET /products", http.HandlerFunc(controllers.GetProducts))
+	r.Handle("POST /products", http.HandlerFunc(middleware.AuthMiddleware(controllers.CreateProduct)))
+	r.Handle("PUT /products/{id}", http.HandlerFunc(middleware.AuthMiddleware(controllers.UpdateProduct)))
+	r.Handle("DELETE /products/{id}", http.HandlerFunc(middleware.AuthMiddleware(controllers.DeleteProduct)))
+	r.Handle("GET /products/{id}", http.HandlerFunc(middleware.AuthMiddleware(controllers.GetProductByID)))
 
 	// Payment routes
 	r.HandleFunc("/payment/checkout", middleware.AuthMiddleware(controllers.CreateCheckoutSessionController))
