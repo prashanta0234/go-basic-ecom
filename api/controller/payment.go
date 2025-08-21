@@ -9,6 +9,19 @@ import (
 	"net/http"
 )
 
+// CreateCheckoutSessionController godoc
+// @Summary Create Stripe checkout session
+// @Description Create a new Stripe checkout session for payment processing
+// @Tags Payment
+// @Accept json
+// @Produce json
+// @Param checkout body map[string]interface{} true "Checkout session details"
+// @Success 200 {object} reponse.SuccessResponse "Checkout session created successfully"
+// @Failure 400 {object} reponse.ErrorResponse "Bad request - Invalid input data"
+// @Failure 401 {object} reponse.ErrorResponse "Unauthorized - Authentication required"
+// @Failure 500 {object} reponse.ErrorResponse "Internal server error"
+// @Security BearerAuth
+// @Router /payment/checkout [post]
 func CreateCheckoutSessionController(w http.ResponseWriter, r *http.Request) {
 	internal.HandleHeader(w)
 
@@ -55,6 +68,16 @@ func CreateCheckoutSessionController(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// PaymentSuccessController godoc
+// @Summary Handle successful payment
+// @Description Handle successful payment callback from Stripe
+// @Tags Payment
+// @Accept json
+// @Produce json
+// @Success 200 {object} reponse.SuccessResponse "Payment successful"
+// @Failure 400 {object} reponse.ErrorResponse "Bad request - Missing session ID"
+// @Failure 500 {object} reponse.ErrorResponse "Internal server error"
+// @Router /payment/success [post]
 func PaymentSuccessController(w http.ResponseWriter, r *http.Request) {
 	internal.HandleHeader(w)
 
@@ -82,6 +105,14 @@ func PaymentSuccessController(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// PaymentCancelController godoc
+// @Summary Handle cancelled payment
+// @Description Handle cancelled payment callback from Stripe
+// @Tags Payment
+// @Accept json
+// @Produce json
+// @Success 200 {object} reponse.SuccessResponse "Payment cancelled"
+// @Router /payment/cancel [post]
 func PaymentCancelController(w http.ResponseWriter, r *http.Request) {
 	internal.HandleHeader(w)
 

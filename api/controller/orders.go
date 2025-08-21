@@ -8,6 +8,17 @@ import (
 	"net/http"
 )
 
+// GetUserOrdersController godoc
+// @Summary Get user orders
+// @Description Retrieve all orders for the authenticated user
+// @Tags Orders
+// @Accept json
+// @Produce json
+// @Success 200 {object} reponse.SuccessResponse "Orders retrieved successfully"
+// @Failure 401 {object} reponse.ErrorResponse "Unauthorized - Authentication required"
+// @Failure 500 {object} reponse.ErrorResponse "Internal server error"
+// @Security BearerAuth
+// @Router /orders [get]
 func GetUserOrdersController(w http.ResponseWriter, r *http.Request) {
 	internal.HandleHeader(w)
 
@@ -32,6 +43,20 @@ func GetUserOrdersController(w http.ResponseWriter, r *http.Request) {
 	reponse.Success(w, 200, "Orders retrieved successfully", orders)
 }
 
+// GetOrderByIDController godoc
+// @Summary Get order by ID
+// @Description Retrieve a specific order by its ID for the authenticated user
+// @Tags Orders
+// @Accept json
+// @Produce json
+// @Param id path string true "Order ID"
+// @Success 200 {object} reponse.SuccessResponse "Order retrieved successfully"
+// @Failure 400 {object} reponse.ErrorResponse "Bad request - Order ID required"
+// @Failure 401 {object} reponse.ErrorResponse "Unauthorized - Authentication required"
+// @Failure 403 {object} reponse.ErrorResponse "Access denied"
+// @Failure 404 {object} reponse.ErrorResponse "Order not found"
+// @Security BearerAuth
+// @Router /order/{id} [get]
 func GetOrderByIDController(w http.ResponseWriter, r *http.Request) {
 	internal.HandleHeader(w)
 

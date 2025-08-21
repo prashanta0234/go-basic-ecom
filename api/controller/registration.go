@@ -8,6 +8,16 @@ import (
 	"net/http"
 )
 
+// RegisterUserController godoc
+// @Summary Register a new user
+// @Description Register a new user account with name, email, and password
+// @Tags Authentication
+// @Accept json
+// @Produce json
+// @Param user body internal.UserRegistrationSchema true "User registration information"
+// @Success 201 {object} reponse.SuccessResponse "Registration successful"
+// @Failure 400 {object} reponse.ErrorResponse "Registration failed"
+// @Router /registration [post]
 func RegisterUserController(w http.ResponseWriter, r *http.Request) {
 
 	internal.HandleHeader(w)

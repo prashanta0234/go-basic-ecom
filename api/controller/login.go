@@ -8,6 +8,16 @@ import (
 	"net/http"
 )
 
+// LoginController godoc
+// @Summary User login
+// @Description Authenticate user with email and password to get JWT token
+// @Tags Authentication
+// @Accept json
+// @Produce json
+// @Param credentials body internal.UserLoginSchema true "User login credentials"
+// @Success 201 {object} reponse.SuccessResponse "Login successful"
+// @Failure 400 {object} reponse.ErrorResponse "Login failed"
+// @Router /login [post]
 func LoginController(w http.ResponseWriter, r *http.Request) {
 	internal.HandleHeader(w)
 

@@ -11,6 +11,20 @@ import (
 	"strings"
 )
 
+// GetProducts godoc
+// @Summary Get all products
+// @Description Retrieve all products with optional filtering and pagination
+// @Tags Products
+// @Accept json
+// @Produce json
+// @Param name query string false "Filter by product name"
+// @Param page query int false "Page number (default: 1)"
+// @Param skip query int false "Number of items to skip (default: 0)"
+// @Param limit query int false "Number of items per page (default: 10)"
+// @Success 200 {object} reponse.SuccessResponse "Products fetched successfully"
+// @Failure 400 {object} reponse.ErrorResponse "Bad request - Invalid parameters"
+// @Failure 500 {object} reponse.ErrorResponse "Internal server error"
+// @Router /products [get]
 func GetProducts(w http.ResponseWriter, r *http.Request) {
 
 	nameFilter := r.URL.Query().Get("name")
@@ -59,6 +73,19 @@ func GetProducts(w http.ResponseWriter, r *http.Request) {
 	reponse.Success(w, 200, "Products fetched successfully!", productsResponse)
 }
 
+// CreateProduct godoc
+// @Summary Create a new product
+// @Description Create a new product (requires authentication)
+// @Tags Products
+// @Accept json
+// @Produce json
+// @Param product body internal.ProductsSchema true "Product information"
+// @Success 201 {object} reponse.SuccessResponse "Product created successfully"
+// @Failure 400 {object} reponse.ErrorResponse "Bad request - Invalid input data"
+// @Failure 401 {object} reponse.ErrorResponse "Unauthorized - Authentication required"
+// @Failure 500 {object} reponse.ErrorResponse "Internal server error"
+// @Security BearerAuth
+// @Router /products [post]
 func CreateProduct(w http.ResponseWriter, r *http.Request) {
 	var input internal.ProductsSchema
 	err := json.NewDecoder(r.Body).Decode(&input)
@@ -79,6 +106,21 @@ func CreateProduct(w http.ResponseWriter, r *http.Request) {
 
 	reponse.Success(w, 201, "Product Created successfully!", data)
 }
+
+// UpdateProduct godoc
+// @Summary Update a product
+// @Description Update an existing product (requires authentication)
+// @Tags Products
+// @Accept json
+// @Produce json
+// @Param id path string true "Product ID"
+// @Param product body internal.ProductsSchema true "Updated product information"
+// @Success 200 {object} reponse.SuccessResponse "Product updated successfully"
+// @Failure 400 {object} reponse.ErrorResponse "Bad request - Invalid input data or product ID"
+// @Failure 401 {object} reponse.ErrorResponse "Unauthorized - Authentication required"
+// @Failure 500 {object} reponse.ErrorResponse "Internal server error"
+// @Security BearerAuth
+// @Router /products/{id} [put]
 func UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	pathParts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
 
@@ -107,6 +149,20 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request) {
 
 	reponse.Success(w, 200, "Product updated successfully!", updatedProduct)
 }
+
+// DeleteProduct godoc
+// @Summary Delete a product
+// @Description Delete a product (requires authentication)
+// @Tags Products
+// @Accept json
+// @Produce json
+// @Param id path string true "Product ID"
+// @Success 200 {object} reponse.SuccessResponse "Product deleted successfully"
+// @Failure 400 {object} reponse.ErrorResponse "Bad request - Product ID required"
+// @Failure 401 {object} reponse.ErrorResponse "Unauthorized - Authentication required"
+// @Failure 500 {object} reponse.ErrorResponse "Internal server error"
+// @Security BearerAuth
+// @Router /products/{id} [delete]
 func DeleteProduct(w http.ResponseWriter, r *http.Request) {
 	pathParts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
 
@@ -127,6 +183,20 @@ func DeleteProduct(w http.ResponseWriter, r *http.Request) {
 
 	reponse.Success(w, 200, "Product deleted successfully!", nil)
 }
+
+// GetProductByID godoc
+// @Summary Get product by ID
+// @Description Retrieve a specific product by its ID (requires authentication)
+// @Tags Products
+// @Accept json
+// @Produce json
+// @Param id path string true "Product ID"
+// @Success 200 {object} reponse.SuccessResponse "Product fetched successfully"
+// @Failure 400 {object} reponse.ErrorResponse "Bad request - Product ID required"
+// @Failure 401 {object} reponse.ErrorResponse "Unauthorized - Authentication required"
+// @Failure 404 {object} reponse.ErrorResponse "Product not found"
+// @Security BearerAuth
+// @Router /products/{id} [get]
 func GetProductByID(w http.ResponseWriter, r *http.Request) {
 	pathParts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
 
