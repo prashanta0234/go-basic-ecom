@@ -10,11 +10,6 @@ import (
 
 func LoginController(w http.ResponseWriter, r *http.Request) {
 	internal.HandleHeader(w)
-	if r.Method != "POST" {
-		w.WriteHeader(404)
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
 
 	var input internal.UserLoginSchema
 	err := json.NewDecoder(r.Body).Decode(&input)

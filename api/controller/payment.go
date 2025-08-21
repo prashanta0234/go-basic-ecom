@@ -12,11 +12,6 @@ import (
 func CreateCheckoutSessionController(w http.ResponseWriter, r *http.Request) {
 	internal.HandleHeader(w)
 
-	if r.Method != "POST" {
-		reponse.Error(w, 404, "Method not allowed", errors.New("method not allowed"))
-		return
-	}
-
 	userID := r.Context().Value("userID")
 	if userID == nil {
 		reponse.Error(w, 401, "User not authenticated", errors.New("user not authenticated"))

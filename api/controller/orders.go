@@ -11,11 +11,6 @@ import (
 func GetUserOrdersController(w http.ResponseWriter, r *http.Request) {
 	internal.HandleHeader(w)
 
-	if r.Method != "GET" {
-		reponse.Error(w, 405, "Method not allowed", errors.New("method not allowed"))
-		return
-	}
-
 	userID := r.Context().Value("userID")
 	if userID == nil {
 		reponse.Error(w, 401, "User not authenticated", errors.New("user not authenticated"))
@@ -39,11 +34,6 @@ func GetUserOrdersController(w http.ResponseWriter, r *http.Request) {
 
 func GetOrderByIDController(w http.ResponseWriter, r *http.Request) {
 	internal.HandleHeader(w)
-
-	if r.Method != "GET" {
-		reponse.Error(w, 405, "Method not allowed", errors.New("method not allowed"))
-		return
-	}
 
 	orderID := r.URL.Path[len("/order/"):]
 	if orderID == "" {

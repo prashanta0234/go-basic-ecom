@@ -5,17 +5,12 @@ import (
 	"e-com/internal/reponse"
 	usecase "e-com/usecase"
 	"encoding/json"
-	"errors"
 	"net/http"
 )
 
 func RegisterUserController(w http.ResponseWriter, r *http.Request) {
 
 	internal.HandleHeader(w)
-	if r.Method != "POST" {
-		reponse.Error(w, 404, "Method not allowed", errors.New("method not allowed"))
-		return
-	}
 
 	var input internal.UserRegistrationSchema
 	err := json.NewDecoder(r.Body).Decode(&input)

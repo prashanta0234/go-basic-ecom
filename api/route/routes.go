@@ -11,26 +11,26 @@ func SetupRoutes() *http.ServeMux {
 	r := http.NewServeMux()
 
 	// Health check
-	r.HandleFunc("/health", HandleRoot)
+	r.HandleFunc("GET /health", HandleRoot)
 
 	// Auth routes
-	r.HandleFunc("/registration", controllers.RegisterUserController)
-	r.HandleFunc("/login", controllers.LoginController)
+	r.HandleFunc("POST /registration", http.HandlerFunc(controllers.RegisterUserController))
+	r.HandleFunc("POST /login", http.HandlerFunc(controllers.LoginController))
 
-	r.Handle("GET /products", http.HandlerFunc(controllers.GetProducts))
-	r.Handle("POST /products", http.HandlerFunc(middleware.AuthMiddleware(controllers.CreateProduct)))
-	r.Handle("PUT /products/{id}", http.HandlerFunc(middleware.AuthMiddleware(controllers.UpdateProduct)))
-	r.Handle("DELETE /products/{id}", http.HandlerFunc(middleware.AuthMiddleware(controllers.DeleteProduct)))
-	r.Handle("GET /products/{id}", http.HandlerFunc(middleware.AuthMiddleware(controllers.GetProductByID)))
+	r.HandleFunc("GET /products", http.HandlerFunc(controllers.GetProducts))
+	r.HandleFunc("POST /products", http.HandlerFunc(middleware.AuthMiddleware(controllers.CreateProduct)))
+	r.HandleFunc("PUT /products/{id}", http.HandlerFunc(middleware.AuthMiddleware(controllers.UpdateProduct)))
+	r.HandleFunc("DELETE /products/{id}", http.HandlerFunc(middleware.AuthMiddleware(controllers.DeleteProduct)))
+	r.HandleFunc("GET /products/{id}", http.HandlerFunc(middleware.AuthMiddleware(controllers.GetProductByID)))
 
 	// Payment routes
-	r.HandleFunc("/payment/checkout", middleware.AuthMiddleware(controllers.CreateCheckoutSessionController))
-	r.HandleFunc("/payment/success", controllers.PaymentSuccessController)
-	r.HandleFunc("/payment/cancel", controllers.PaymentCancelController)
+	r.HandleFunc("POST /payment/checkout", middleware.AuthMiddleware(controllers.CreateCheckoutSessionController))
+	r.HandleFunc("POST /payment/success", controllers.PaymentSuccessController)
+	r.HandleFunc("POST /payment/cancel", controllers.PaymentCancelController)
 
 	// Order routes (protected)
-	r.HandleFunc("/orders", middleware.AuthMiddleware(controllers.GetUserOrdersController))
-	r.HandleFunc("/order/", middleware.AuthMiddleware(controllers.GetOrderByIDController))
+	r.HandleFunc("GET /orders", middleware.AuthMiddleware(controllers.GetUserOrdersController))
+	r.HandleFunc("GET /order/", middleware.AuthMiddleware(controllers.GetOrderByIDController))
 
 	r.HandleFunc("/cache/invalidate", cache.CacheInvalidationEndpoint)
 
